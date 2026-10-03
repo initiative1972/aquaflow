@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint
+        run: flake8 src tests --max-line-length=120
+
+      - name: Unit tests (local Spark + Delta)
+        run: pytest -q
+
+# Note: only dependency-free, genuinely runnable checks live here, so a green
+# badge is real. Databricks/ADF/Bicep and the Great Expectations suite that
+# needs a configured datasource are design artefacts and are NOT run in CI.
