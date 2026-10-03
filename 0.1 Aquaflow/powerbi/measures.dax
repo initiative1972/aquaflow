@@ -1,0 +1,49 @@
+Total Billed =
+    SUM ( FactBilling[total_billed] )
+
+Bill Count =
+    COUNTROWS ( FactBilling )
+
+Avg Bill Value =
+    DIVIDE ( [Total Billed], [Bill Count] )
+
+Active Customers =
+    CALCULATE (
+        DISTINCTCOUNT ( DimCustomer[account_id] ),
+        DimCustomer[is_current] = TRUE ()
+    )
+
+Total Billed LY =
+    CALCULATE ( [Total Billed], SAMEPERIODLASTYEAR ( DimDate[date] ) )
+
+Total Billed YoY % =
+    DIVIDE ( [Total Billed] - [Total Billed LY], [Total Billed LY] )
+
+Total Billed MTD =
+    TOTALMTD ( [Total Billed], DimDate[date] )
+
+Total Billed YTD =
+    TOTALYTD ( [Total Billed], DimDate[date] )
+
+Reconciliation Drift % =
+    CALCULATE (
+        MAX ( ReconciliationLog[drift_pct] ),
+        LASTNONBLANK ( ReconciliationLog[run_ts], 1 )
+    )
+
+Reconciliation Status =
+    VAR latest = [Reconciliation Drift %]
+    VAR tol = SELECTEDVALUE ( ReconciliationLog[tolerance_pct], 0.01 )
+    RETURN IF ( latest <= tol, "PASS", "BREACH" )
+
+Reconciliation Status Colour =   // for conditional formatting
+    IF ( [Reconciliation Status] = "PASS", "#2E7D32", "#C62828" )
+
+Late Arriving Records =
+    CALCULATE (
+        COUNTROWS ( FactBilling ),
+        FactBilling[is_late_arriving] = TRUE ()
+    )
+
+Last Refresh =
+    MAX ( ReconciliationLog[run_ts] )   // shown on the report cover for trust
