@@ -1,6 +1,6 @@
 # aquaflow
 Data engineering project for AquaFlow
-# AquaFlow‑Modernize
+# AquaFlow‑Modernise
 
 **An Azure lakehouse migration accelerator: reverse‑engineering legacy T‑SQL into a governed Databricks Medallion architecture, with automated dual‑run reconciliation, a Power BI semantic layer, and a Salesforce‑ready serving tier.**
 
